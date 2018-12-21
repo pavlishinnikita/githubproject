@@ -13,8 +13,10 @@ class AppAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/site.css',
+        'css/repo.css'
     ];
     public $js = [
+        'js/SearchRepo.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',
