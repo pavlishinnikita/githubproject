@@ -123,7 +123,6 @@ class UserController extends \yii\web\Controller
             }
         } else {
             // лайк был
-            var_dump($like_dislike);
             $like_dislike->like = UserRepoLike::DISLIKE;
             if($like_dislike->save()) {
                 return $this->renderAjax('_like');
