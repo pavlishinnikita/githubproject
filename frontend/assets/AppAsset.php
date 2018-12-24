@@ -16,7 +16,8 @@ class AppAsset extends AssetBundle
         'css/repo.css'
     ];
     public $js = [
-        'js/SearchRepo.js'
+        'js/SearchRepo.js',
+        'js/LikeRepo.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',

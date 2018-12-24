@@ -15,11 +15,10 @@ use Yii;
 class UserRepoLike extends \yii\db\ActiveRecord
 {
     /**
-     * Constant for identify like: 0 - nothing, 1 - like, 2 - dislike
+     * Constant for identify like: 1 - like, 0 - dislike
      */
-    const NOTHING = 0;
     const LIKE = 1;
-    const DISLIKE = 2;
+    const DISLIKE = 0;
 
     /**
      * {@inheritdoc}

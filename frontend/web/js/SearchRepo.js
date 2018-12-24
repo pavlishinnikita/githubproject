@@ -15,7 +15,6 @@ $('#bth-search').on('click', function (e) {
         //url: 'https://api.github.com/search/repositories',
         //data: "q=" + name + "&sort=stars&order=desc",
         success: function (res) {
-            console.log(res);
             $('.content-container').html(res);
         },
         error: function (res) {
@@ -24,7 +23,3 @@ $('#bth-search').on('click', function (e) {
     });
     return false;
 });
-// $(document).on('beforeSubmit', "#search-form", function (e) {
-//     e.preventDefault();
-//     return false;
-// });

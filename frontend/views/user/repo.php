@@ -2,7 +2,7 @@
 /**
  * @var $this yii\web\View
  * @var $answer mixed
- * @var $repo_like UserRepoLike
+ * @var $user_like UserRepoLike[]
  *
  */
 
@@ -17,19 +17,24 @@ use yii\helpers\Url;
             <form method="get" id="search-form">
                 <label for="repoName">Название репозитория</label>
                 <input type="text" id="repoName">
-                <div id="bth-search" class="btn btn-info">Го <i class="glyphicon glyphicon-search"></i> </div>
-<!--                <input type="submit" value="Го :)">-->
+                <div id="bth-search" class="btn btn-info">Го <i class="glyphicon glyphicon-search"></i></div>
             </form>
         </div>
     </div>
 </div>
-<div class="glyphicon glyphicon-thumbs-up"></div>
-<div class="glyphicon glyphicon-thumbs-down"></div>
 <div class="content-container row">
     <?for ($i = 0; $i < 50; $i++):?>
     <div class="col-lg-12 col-md-12 col-xs-12">
-        <div class="repo-list-item">
-            <a href="/user/test?a=<?=$answer[$i]['full_name']?>"><?=$answer[$i]['name']?></a>
+        <div class="repo-list-item" data-id = "<?=$answer[$i]['id']?>">
+            <a href="/user/description?repo_name=<?=$answer[$i]['full_name']?>&repo_id=<?=$answer[$i]['id']?>"><?=$answer[$i]['full_name']?></a>
+<!--            <div class="glyphicon glyphicon-thumbs-down repo-like"></div>-->
+
+                <?if($user_like[$i]->id_repo != $answer[$i]['id']):?>
+                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>
+                <?else:?>
+                    <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>
+                <?endif;?>
+
         </div>
     </div>
     <?endfor;?>
