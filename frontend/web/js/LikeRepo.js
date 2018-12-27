@@ -1,46 +1,34 @@
-$('.repo-like').on('click', function (e) {
-    console.log($(e.target).parent().data('id'));
+/**
+ * Функция для обобщения запроса на сервер и совершения лайка/дизлайка
+ * @param action - выполняемое действие
+ * @param e - html объект с данными
+ */
+function ajaxLikeDislike(action, e) {
     $.ajax({
         method: 'POST',
-        url: "/user/like",
+        url: action,
         data: {
-            repo_id: $(e.target).parent().data('id')
+            repo_id: $(e.target).parent().data('id'),
+            repo_name: $(e.target).prev().html()
         },
         success: function (res) {
-            var disLike = document.createElement("div");
-            disLike.setAttribute('class', res);
-            e.target.replaceWith(disLike);
+            e.target.setAttribute('class', res);
+            // var disLike = document.createElement("div");
+            // disLike.setAttribute('class', res);
+            // e.target.replaceWith(disLike);
         },
         error: function (res) {
             console.log(res);
         }
     });
-});
-$('.repo-dislike').on('click', function (e) {
-    $.ajax({
-        method: 'POST',
-        url: "/user/like",
-        data: {
-            repo_id: $(e.target).parent().data('id')
-        },
-        success: function (res) {
-            var disLike = document.createElement("div");
-            disLike.setAttribute('class', res);
-            e.target.replaceWith(disLike);
-        },
-        error: function (res) {
-            console.log(res);
-        }
-    });
-});
+}
 
-
-// $('.repo-list-item').on('click', function (e) {
-    // if(e.target == $('.repo-like')) {
-    //     console.log("Like");
-    // } else if(e.target == $('.repo-dislike')) {
-    //     console.log("Like");
-    // } else {
-    //     return false;
-    // }
-// });
+$('.content-container').on('click', 'i', function (e) {
+    e.preventDefault();
+    if(e.target.classList.contains('repo-like')) {
+        ajaxLikeDislike("/user/like", e);
+    }
+    if(e.target.classList.contains('repo-dislike')) {
+        ajaxLikeDislike("/user/like", e);
+    }
+});

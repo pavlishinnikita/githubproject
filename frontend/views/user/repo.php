@@ -35,13 +35,13 @@ use yii\helpers\Url;
                 <?php $isLike = false; ?>
                     <?if($like->id_repo == $answer[$i]['id']):?>
 <!--                        <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
-                        <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>
+                        <i class="glyphicon glyphicon-thumbs-down repo-dislike"></i>
                         <?php $isLike = true; ?>
                     <?break;?>
                     <?endif;?>
                 <?endforeach;?>
             <?if(!$isLike):?>
-                <div class="glyphicon glyphicon-thumbs-up repo-like"></div>
+                <i class="glyphicon glyphicon-thumbs-up repo-like"></i>
             <?endif;?>
 <!--                --><?//if($user_like[$i]->id_repo != $answer[$i]['id']):?>
 <!--                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->

@@ -6,9 +6,12 @@ use yii\base\InvalidConfigException;
 use yii\db\Query;
 use yii\db\QueryBuilder;
 use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\httpclient\Client;
 use yii\httpclient\Exception;
 use common\models\GitHubHelper;
+use yii\web\HttpException;
+
 define('OFFLINE_MODE', 1);
 class UserController extends \yii\web\Controller
 {
@@ -59,11 +62,9 @@ class UserController extends \yii\web\Controller
     {
         $repo_name = \Yii::$app->request->get('repoName');
         $client = new Client();
-        $response = $client->createResponse();
         if(defined('OFFLINE_MODE')) {
+            $response = $client->createResponse();
             $response->setData(json_decode(file_get_contents('testSearch.json'), true));
-            var_dump($response->data);
-            die();
         } else {
             try {
                 $response = $client->createRequest()
@@ -76,21 +77,28 @@ class UserController extends \yii\web\Controller
             } catch (Exception $e) {
                 new \yii\base\Exception('ошибка запроса');
             }
-
-            if (!$response->isOk) {
-                // обработка ошибки
-            }
-            return $this->renderAjax('_search-repo', [
-                'answer' => $response->data['items']
-            ]);
+                if (!$response->isOk) {
+                    throw new HttpException(501, "Ошибка сервера");
+                }
         }
-//        return $this->render('repo', [
-//            'answer' => $response->data
-//        ]);
+
+        $user_like = UserRepoLike::find()
+            ->where(['id_user' => \Yii::$app->user->identity->getId()])
+            ->andWhere(['like' => UserRepoLike::LIKE])
+//            ->andWhere('id_repo >= ' . $response->data['items'][0]['id'])
+            ->all();
+        return $this->renderAjax('_search-repo', [
+            'answer' => $response->data['items'],
+            'user_like' => $user_like
+        ]);
     }
 
     public function actionDescription($repo_name, $repo_id)
     {
+        $isValidRepo = UserRepoLike::findOne(['id_repo' => $repo_id]);
+        if($isValidRepo->repo_name != $repo_name) {
+            throw new HttpException(400 ,'Строка браузера доступна только продвинутым пользователям');
+        }
         $client = new Client();
         try {
             $response = $client->createRequest()
@@ -98,8 +106,8 @@ class UserController extends \yii\web\Controller
                 ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE ])
                 ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT ])
                 ->setUrl([ GitHubHelper::URL_SEARCH])
-                ->setData(['q' => $repo_name]);
-//                ->send();
+                ->setData(['q' => $repo_name])
+                ->send();
         } catch (Exception $e) {
             // обработка ошибки
         } catch (InvalidConfigException $e) {
@@ -107,21 +115,16 @@ class UserController extends \yii\web\Controller
         }
 
         if (!$response->isOk) {
-//             запрос не выполнился
+            throw new HttpException(501, "Ошибка сервера");
         }
-        $like = ( new Query() )
-            ->select(['id'])
-            ->from('user_repo_like')
+        $like = UserRepoLike::find()
             ->where(['id_repo' => $repo_id])
             ->andWhere(['like' => UserRepoLike::LIKE])
             ->count();
-        $dislike = ( new Query() )
-            ->select(['id'])
-            ->from('user_repo_like')
+        $dislike = UserRepoLike::find()
             ->where(['id_repo' => $repo_id])
             ->andWhere(['like' => UserRepoLike::DISLIKE])
             ->count();
-//        var_dump($response->data);
         return $this->render('description', [
             'answer' => $response->data,
             'like' => $like,
@@ -132,12 +135,14 @@ class UserController extends \yii\web\Controller
     public function actionLike()
     {
         $id_repo = \Yii::$app->request->post('repo_id');
+        $repo_name = \Yii::$app->request->post('repo_name');
         $like_dislike = UserRepoLike::findOne(['id_repo' => $id_repo]);
         if($like_dislike == NULL || $like_dislike->like == UserRepoLike::DISLIKE) { // лайка не было или дизлайк
             $model = new UserRepoLike();
             $model->id_user = \Yii::$app->user->identity->getId();
             $model->id_repo = $id_repo;
             $model->like = UserRepoLike::LIKE;
+            $model->repo_name = $repo_name;
             if($model->save()) {
                 return 'glyphicon glyphicon-thumbs-down repo-dislike';
             }

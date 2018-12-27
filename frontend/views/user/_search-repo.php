@@ -10,19 +10,29 @@
  */
 
 use frontend\models\UserRepoLike;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 ?>
 <?for ($i = 0; $i < 50; $i++):?>
     <div class="col-lg-12 col-md-12 col-xs-12">
-        <div class="repo-list-item">
-            <?= ($i + 1) . '(' . $answer[$i]['id'] . ') ' . ': '?> <!-- debug line -->
-            <a href="/user/test?a=<?=$answer[$i]['full_name']?>"><?=$answer[$i]['full_name']?></a>
-            <?if ($i != count($user_like)):?>
-                <?if($user_like[$i]->id_repo != $answer[$i]['id']):?>
-                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>
-                <?else:?>
-                    <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>
+        <div class="repo-list-item" data-id = "<?=$answer[$i]['id']?>">
+            <?= Html::a($answer[$i]['full_name'], Url::to([
+                '/user/description',
+                'repo_name' => $answer[$i]['full_name'],
+                'repo_id' => $answer[$i]['id']
+            ]))?>
+            <?foreach ($user_like as $like):?>
+                <?php $isLike = false; ?>
+                <?if($like->id_repo == $answer[$i]['id']):?>
+                    <!--                        <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
+                    <i class="glyphicon glyphicon-thumbs-down repo-dislike"></i>
+                    <?php $isLike = true; ?>
+                    <?break;?>
                 <?endif;?>
+            <?endforeach;?>
+            <?if(!$isLike):?>
+                <i class="glyphicon glyphicon-thumbs-up repo-like"></i>
             <?endif;?>
         </div>
     </div>

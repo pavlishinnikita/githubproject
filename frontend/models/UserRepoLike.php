@@ -11,6 +11,7 @@ use Yii;
  * @property int $id_user
  * @property int $id_repo
  * @property int $like
+ * @property string $repo_name
  */
 class UserRepoLike extends \yii\db\ActiveRecord
 {
@@ -36,6 +37,7 @@ class UserRepoLike extends \yii\db\ActiveRecord
         return [
             [['id_user', 'id_repo'], 'required'],
             [['id_user', 'id_repo', 'like'], 'integer'],
+            [['repo_name'], 'string', 'max' => 255],
         ];
     }
 
@@ -49,6 +51,7 @@ class UserRepoLike extends \yii\db\ActiveRecord
             'id_user' => 'Id User',
             'id_repo' => 'Id Repo',
             'like' => 'Like',
+            'repo_name' => 'Repo Name',
         ];
     }
 }
