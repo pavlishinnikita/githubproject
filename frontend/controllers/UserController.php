@@ -81,7 +81,6 @@ class UserController extends \yii\web\Controller
                     throw new HttpException(501, "Ошибка сервера");
                 }
         }
-
         $user_like = UserRepoLike::find()
             ->where(['id_user' => \Yii::$app->user->identity->getId()])
             ->andWhere(['like' => UserRepoLike::LIKE])
@@ -154,5 +153,10 @@ class UserController extends \yii\web\Controller
             }
         }
         return "Ошибка сервера";
+    }
+
+    public function actionTest()
+    {
+        return $this->render('test');
     }
 }
