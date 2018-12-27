@@ -136,7 +136,7 @@ class UserController extends \yii\web\Controller
         $id_repo = \Yii::$app->request->post('repo_id');
         $repo_name = \Yii::$app->request->post('repo_name');
         $like_dislike = UserRepoLike::findOne(['id_repo' => $id_repo]);
-        if($like_dislike == NULL || $like_dislike->like == UserRepoLike::DISLIKE) { // лайка не было или дизлайк
+        if($like_dislike == NULL) { // лайка не было и дизлайка не было
             $model = new UserRepoLike();
             $model->id_user = \Yii::$app->user->identity->getId();
             $model->id_repo = $id_repo;
@@ -150,6 +150,12 @@ class UserController extends \yii\web\Controller
             $like_dislike->like = UserRepoLike::DISLIKE;
             if($like_dislike->save()) {
                 return 'glyphicon glyphicon-thumbs-up repo-like';
+            }
+        } else {
+            // дизлайк был
+            $like_dislike->like = UserRepoLike::LIKE;
+            if($like_dislike->save()) {
+                return 'glyphicon glyphicon-thumbs-down repo-dislike';
             }
         }
         return "Ошибка сервера";

@@ -13,9 +13,6 @@ function ajaxLikeDislike(action, e) {
         },
         success: function (res) {
             e.target.setAttribute('class', res);
-            // var disLike = document.createElement("div");
-            // disLike.setAttribute('class', res);
-            // e.target.replaceWith(disLike);
         },
         error: function (res) {
             console.log(res);
@@ -24,7 +21,6 @@ function ajaxLikeDislike(action, e) {
 }
 
 $('.content-container').on('click', 'i', function (e) {
-    e.preventDefault();
     if(e.target.classList.contains('repo-like')) {
         ajaxLikeDislike("/user/like", e);
     }
