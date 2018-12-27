@@ -135,7 +135,10 @@ class UserController extends \yii\web\Controller
     {
         $id_repo = \Yii::$app->request->post('repo_id');
         $repo_name = \Yii::$app->request->post('repo_name');
-        $like_dislike = UserRepoLike::findOne(['id_repo' => $id_repo]);
+        $like_dislike = UserRepoLike::find()
+            ->where(['id_repo' => $id_repo])
+            ->andWhere(['id_user' => \Yii::$app->user->identity->getId()])
+            ->one();
         if($like_dislike == NULL) { // лайка не было и дизлайка не было
             $model = new UserRepoLike();
             $model->id_user = \Yii::$app->user->identity->getId();
