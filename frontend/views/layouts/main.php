@@ -42,7 +42,7 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Зарегестрироваться', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = ['label' => 'Вперед к репозиториям :)', 'url' => Url::to(['user/repo'])];
+        $menuItems[] = ['label' => 'Вперед к репозиториям :)', 'url' => Url::to(['user/repo', 'since' => 0])];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(

@@ -23,19 +23,40 @@ use yii\helpers\Url;
     </div>
 </div>
 <div class="content-container row">
-    <?for ($i = 0; $i < 50; $i++):?>
+    <?for ($i = 0; $i < 50; $i++):?> <!-- пока так, а потом что-то придумаю -->
     <div class="col-lg-12 col-md-12 col-xs-12">
         <div class="repo-list-item" data-id = "<?=$answer[$i]['id']?>">
-            <a href="/user/description?repo_name=<?=$answer[$i]['full_name']?>&repo_id=<?=$answer[$i]['id']?>"><?=$answer[$i]['full_name']?></a>
-<!--            <div class="glyphicon glyphicon-thumbs-down repo-like"></div>-->
-
-                <?if($user_like[$i]->id_repo != $answer[$i]['id']):?>
-                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>
-                <?else:?>
-                    <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>
-                <?endif;?>
-
+            <?= Html::a($answer[$i]['full_name'], Url::to([
+                    '/user/description',
+                    'repo_name' => $answer[$i]['full_name'],
+                    'repo_id' => $answer[$i]['id']
+            ]))?>
+            <?foreach ($user_like as $like):?>
+                <?php $isLike = false; ?>
+                    <?if($like->id_repo == $answer[$i]['id']):?>
+<!--                        <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
+                        <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>
+                        <?php $isLike = true; ?>
+                    <?break;?>
+                    <?endif;?>
+                <?endforeach;?>
+            <?if(!$isLike):?>
+                <div class="glyphicon glyphicon-thumbs-up repo-like"></div>
+            <?endif;?>
+<!--                --><?//if($user_like[$i]->id_repo != $answer[$i]['id']):?>
+<!--                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
+<!--                --><?//else:?>
+<!--                    <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>-->
+<!--                --><?//endif;?>
         </div>
     </div>
-    <?endfor;?>
+    <?endfor;?> <!-- пока так, а потом что-то придумаю -->
+</div>
+<div class="content-navigate row">
+    <div class="col-lg-12 col-xs-12 col-md-12">
+        <?= Html::a('Следующие репозитории', Url::to([
+            '/user/repo',
+            'since' => $answer[count($answer) - 1]['id'],
+        ]))?>
+    </div>
 </div>

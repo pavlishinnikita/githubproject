@@ -1,7 +1,5 @@
 $('.repo-like').on('click', function (e) {
     console.log($(e.target).parent().data('id'));
-    // console.log($(this).data('id'));
-    console.log("test-like");
     $.ajax({
         method: 'POST',
         url: "/user/like",
@@ -9,8 +7,9 @@ $('.repo-like').on('click', function (e) {
             repo_id: $(e.target).parent().data('id')
         },
         success: function (res) {
-            console.log(res);
-            // this.replaceWith(res);
+            var disLike = document.createElement("div");
+            disLike.setAttribute('class', res);
+            e.target.replaceWith(disLike);
         },
         error: function (res) {
             console.log(res);
@@ -18,9 +17,21 @@ $('.repo-like').on('click', function (e) {
     });
 });
 $('.repo-dislike').on('click', function (e) {
-    // console.log($(this).data('id'));
-    console.log($(e.target).parent().data('id'));
-    console.log("test-dislike");
+    $.ajax({
+        method: 'POST',
+        url: "/user/like",
+        data: {
+            repo_id: $(e.target).parent().data('id')
+        },
+        success: function (res) {
+            var disLike = document.createElement("div");
+            disLike.setAttribute('class', res);
+            e.target.replaceWith(disLike);
+        },
+        error: function (res) {
+            console.log(res);
+        }
+    });
 });
 
 

@@ -9,58 +9,81 @@ use yii\helpers\Json;
 use yii\httpclient\Client;
 use yii\httpclient\Exception;
 use common\models\GitHubHelper;
-
+define('OFFLINE_MODE', 1);
 class UserController extends \yii\web\Controller
 {
-    public function actionRepo()
+    public function actionRepo($since)
     {
-        $user_like = UserRepoLike::find()
-            ->where(['id_user' => \Yii::$app->user->identity->getId() ])
-            ->all();
-        $client = new Client();
-        try {
-            $response = $client->createRequest()
-                ->setMethod('get')
-                ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE ])
-                ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT ])
-                ->setUrl([ GitHubHelper::URL ])
-                ->setData(['since' => 0]) // last remember repo
-                ->send();
-        } catch (Exception $e) {
-            new \yii\base\Exception('ошибка запроса');
-        }
+        if(defined('OFFLINE_MODE')) {
+            $client = new Client();
+            $response = $client->createResponse();
+            $response->setData(json_decode(file_get_contents('testRepos.json'), true));
+            $user_like = UserRepoLike::find()
+                ->where(['id_user' => \Yii::$app->user->identity->getId()])
+                ->andWhere(['like' => UserRepoLike::LIKE])
+                ->andWhere('id_repo >= ' . $response->data[0]['id']) // пробую выводить лайки только для
+                // отображаемых репозиториев
+                ->all();
+            return $this->render('repo', [
+                'answer' => $response->data,
+                'user_like' => $user_like
+            ]);
+        } else {
+            $user_like = UserRepoLike::find()
+                ->where(['id_user' => \Yii::$app->user->identity->getId()])
+                ->all();
+            $client = new Client();
+            try {
+                $response = $client->createRequest()
+                    ->setMethod('get')
+                    ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE])
+                    ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT])
+                    ->setUrl([GitHubHelper::URL])
+                    ->setData(['since' => $since])// last remember repo
+                    ->send();
+            } catch (Exception $e) {
+                new \yii\base\Exception('ошибка запроса');
+            }
 
-        if (!$response->isOk) {
-            new \yii\base\Exception('ошибка запроса');
+            if (!$response->isOk) {
+                new \yii\base\Exception('ошибка запроса');
+            }
+            return $this->render('repo', [
+                'answer' => $response->data,
+                'user_like' => $user_like
+            ]);
         }
-        return $this->render('repo', [
-            'answer' => $response->data,
-            'user_like' => $user_like
-        ]);
     }
 
     public function actionSearch()
     {
         $repo_name = \Yii::$app->request->get('repoName');
         $client = new Client();
-        try {
-            $response = $client->createRequest()
-                ->setMethod('get')
-                ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE ])
-                ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT ])
-                ->setUrl([ GitHubHelper::URL_SEARCH])
-                ->setData(['q' => $repo_name, 'per_page' => 50]) // repo name and repo count
-                ->send();
-        } catch (Exception $e) {
-            new \yii\base\Exception('ошибка запроса');
-        }
+        $response = $client->createResponse();
+        if(defined('OFFLINE_MODE')) {
+            $response->setData(json_decode(file_get_contents('testSearch.json'), true));
+            var_dump($response->data);
+            die();
+        } else {
+            try {
+                $response = $client->createRequest()
+                    ->setMethod('get')
+                    ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE])
+                    ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT])
+                    ->setUrl([GitHubHelper::URL_SEARCH])
+                    ->setData(['q' => $repo_name, 'per_page' => 50])// repo name and repo count
+                    ->send();
+            } catch (Exception $e) {
+                new \yii\base\Exception('ошибка запроса');
+            }
 
-        if (!$response->isOk) {
-            // обработка ошибки
+            if (!$response->isOk) {
+                // обработка ошибки
+            }
+            return $this->renderAjax('_search-repo', [
+                'answer' => $response->data['items']
+            ]);
         }
-        return $this->renderAjax('_search-repo', [
-            'answer' => $response->data['items']
-        ]);
 //        return $this->render('repo', [
 //            'answer' => $response->data
 //        ]);
@@ -75,8 +98,8 @@ class UserController extends \yii\web\Controller
                 ->setHeaders(['content-type' => GitHubHelper::CONTENT_TYPE ])
                 ->addHeaders(['user-Agent' => GitHubHelper::USER_AGENT ])
                 ->setUrl([ GitHubHelper::URL_SEARCH])
-                ->setData(['q' => $repo_name])
-                ->send();
+                ->setData(['q' => $repo_name]);
+//                ->send();
         } catch (Exception $e) {
             // обработка ошибки
         } catch (InvalidConfigException $e) {
@@ -110,27 +133,21 @@ class UserController extends \yii\web\Controller
     {
         $id_repo = \Yii::$app->request->post('repo_id');
         $like_dislike = UserRepoLike::findOne(['id_repo' => $id_repo]);
-        if($like_dislike == NULL) {
-            // лайка не было
+        if($like_dislike == NULL || $like_dislike->like == UserRepoLike::DISLIKE) { // лайка не было или дизлайк
             $model = new UserRepoLike();
             $model->id_user = \Yii::$app->user->identity->getId();
             $model->id_repo = $id_repo;
             $model->like = UserRepoLike::LIKE;
             if($model->save()) {
-                return $this->renderAjax('_dislike');
-            } else {
-                return "Ошибка сервера";
+                return 'glyphicon glyphicon-thumbs-down repo-dislike';
             }
-        } else {
+        } else if($like_dislike->like == UserRepoLike::LIKE) {
             // лайк был
             $like_dislike->like = UserRepoLike::DISLIKE;
             if($like_dislike->save()) {
-                return $this->renderAjax('_like');
-            } else {
-                return "Ошибка сервера";
+                return 'glyphicon glyphicon-thumbs-up repo-like';
             }
         }
-//        var_dump(json_encode($like_dislike));
-//        die();
+        return "Ошибка сервера";
     }
 }
