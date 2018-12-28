@@ -12,7 +12,7 @@ use yii\httpclient\Exception;
 use common\models\GitHubHelper;
 use yii\web\HttpException;
 
-define('OFFLINE_MODE', 1);
+//define('OFFLINE_MODE', 1);
 class UserController extends \yii\web\Controller
 {
     public function actionRepo($since)
@@ -95,7 +95,7 @@ class UserController extends \yii\web\Controller
     public function actionDescription($repo_name, $repo_id)
     {
         $isValidRepo = UserRepoLike::findOne(['id_repo' => $repo_id]);
-        if($isValidRepo->repo_name != $repo_name) {
+        if($isValidRepo->repo_name != $repo_name && $isValidRepo != NULL) {
             throw new HttpException(400 ,'Строка браузера доступна только продвинутым пользователям');
         }
         $client = new Client();

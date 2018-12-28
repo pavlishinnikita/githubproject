@@ -23,7 +23,7 @@ use yii\helpers\Url;
     </div>
 </div>
 <div class="content-container row">
-    <?for ($i = 0; $i < 50; $i++):?> <!-- пока так, а потом что-то придумаю -->
+    <?for ($i = 0; $i < count($answer); $i++):?>
     <div class="col-lg-12 col-md-12 col-xs-12">
         <div class="repo-list-item" data-id = "<?=$answer[$i]['id']?>">
             <?= Html::a($answer[$i]['full_name'], Url::to([
@@ -34,7 +34,6 @@ use yii\helpers\Url;
             <?foreach ($user_like as $like):?>
                 <?php $isLike = false; ?>
                     <?if($like->id_repo == $answer[$i]['id']):?>
-<!--                        <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
                         <i class="glyphicon glyphicon-thumbs-down repo-dislike"></i>
                         <?php $isLike = true; ?>
                     <?break;?>
@@ -43,14 +42,9 @@ use yii\helpers\Url;
             <?if(!$isLike):?>
                 <i class="glyphicon glyphicon-thumbs-up repo-like"></i>
             <?endif;?>
-<!--                --><?//if($user_like[$i]->id_repo != $answer[$i]['id']):?>
-<!--                    <div class="glyphicon glyphicon-thumbs-up repo-like"></div>-->
-<!--                --><?//else:?>
-<!--                    <div class="glyphicon glyphicon-thumbs-down repo-dislike"></div>-->
-<!--                --><?//endif;?>
         </div>
     </div>
-    <?endfor;?> <!-- пока так, а потом что-то придумаю -->
+    <?endfor;?>
 </div>
 <div class="content-navigate row">
     <div class="col-lg-12 col-xs-12 col-md-12">
